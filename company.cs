@@ -10,8 +10,6 @@ namespace PayrollLibrary
 
     public class Company
     {
-        private string name;
-        private CompanyAddress address;
         private string phoneNumber;
         private List<Department> departments;
 
@@ -52,7 +50,7 @@ namespace PayrollLibrary
                 if (department.Id == id)
                 {
                     return department;
-                }
+
             }
             return null;
         }
