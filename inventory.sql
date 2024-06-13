@@ -22,15 +22,18 @@ USE Inventory;
 /*
 The following command creates a 'categories' table if it does not already exist, with the following columns:
 - category_id: an integer column that serves as the primary key.
-- category_name: a string column that stores the name of the category.
-- description: a string column that stores the description of the category.
+- category_name: a string column that stores the name of the category (e.g., Electronics, Clothing, Home Goods).
+- description: a string column that stores the description of the category (optional).
+
+
 */
 IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'categories')
 BEGIN
     CREATE TABLE categories (
         category_id INT PRIMARY KEY,
         category_name VARCHAR(50),
-        description VARCHAR(255)
+        description VARCHAR(255),
+        
     );
 END;
 
@@ -41,7 +44,9 @@ The following command creates a 'products' table if it does not already exist, w
 - product_name: a string column that stores the name of the product.
 - category_id: an integer column that serves as a foreign key to the 'categories' table.
 - price: a decimal column that stores the price of the product.
-
+- SKU: a string column that stores the stock keeping unit of the product.
+- created_at: a datetime column that stores the timestamp of when the product was created.
+- updated_at: a datetime column that stores the timestamp of when the product was last updated.
 */
 IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'products')
 BEGIN
@@ -50,6 +55,7 @@ BEGIN
         product_name VARCHAR(50),
         category_id INT,
         price DECIMAL(10, 2),
+        SKU VARCHAR(50),
         FOREIGN KEY (category_id) REFERENCES categories(category_id),
         -- Add a created_at column to store the timestamp of when the product was created.
         created_at DATETIME DEFAULT GETDATE(),
@@ -69,59 +75,54 @@ INSERT INTO categories (category_id, category_name, description) VALUES
 (3, 'Home Goods', 'Household items and decor');
 
 -- The following commands populate the 'products' table with sample data.
-INSERT INTO products (product_id, product_name, category_id, price) VALUES
-(1, 'Laptop', 1, 999.99),
-(2, 'Smartphone', 1, 599.99),
-(3, 'T-shirt', 2, 19.99),
-(4, 'Jeans', 2, 49.99),
-(5, 'Sofa', 3, 399.99),
-(6, 'Coffee Table', 3, 149.99);
+INSERT INTO products (product_id, product_name, category_id, price, SKU) VALUES
+(1, 'Laptop', 1, 999.99, 'ABC123'),
+(2, 'Smartphone', 1, 599.99, 'DEF456'),
+(3, 'T-Shirt', 2, 19.99, 'GHI789'),
+(4, 'Jeans', 2, 39.99, 'JKL012'),
+(5, 'Coffee Maker', 3, 49.99, 'MNO345'),
+(6, 'Throw Pillow', 3, 9.99, 'PQR678');
 
 -- The following command creates a stored procedure to get all categories.
-IF OBJECT_ID('usp_GetAllCategories') IS NOT NULL
+IF OBJECT_ID('dbo.GetCategories') IS NOT NULL
 BEGIN
-    DROP PROCEDURE usp_GetAllCategories;
+    DROP PROCEDURE dbo.GetCategories;
 END;
-
-CREATE PROCEDURE usp_GetAllCategories
+GO
+CREATE PROCEDURE dbo.GetCategories
 AS
 BEGIN
     SELECT * FROM categories;
 END;
+GO
 
 -- The following command creates a stored procedure to get all products in a specific category.
-IF OBJECT_ID('usp_GetProductsByCategory') IS NOT NULL
+IF OBJECT_ID('dbo.GetProductsByCategory') IS NOT NULL
 BEGIN
-    DROP PROCEDURE usp_GetProductsByCategory;
+    DROP PROCEDURE dbo.GetProductsByCategory;
 END;
-
-CREATE PROCEDURE usp_GetProductsByCategory
+GO
+CREATE PROCEDURE dbo.GetProductsByCategory
     @category_id INT
 AS
 BEGIN
     SELECT * FROM products WHERE category_id = @category_id;
 END;
+GO
 
 -- The following command creates a stored procedure to get all products in a specific price range sorted by price in ascending order.
-IF OBJECT_ID('usp_GetProductsByPriceRange') IS NOT NULL
+IF OBJECT_ID('dbo.GetProductsByPriceRange') IS NOT NULL
 BEGIN
-    DROP PROCEDURE usp_GetProductsByPriceRange;
+    DROP PROCEDURE dbo.GetProductsByPriceRange;
 END;
-
-CREATE PROCEDURE usp_GetProductsByPriceRange
-    @min_price DECIMAL,
-    @max_price DECIMAL
+GO
+CREATE PROCEDURE dbo.GetProductsByPriceRange
+    @min_price DECIMAL(10, 2),
+    @max_price DECIMAL(10, 2)
 AS
 BEGIN
     SELECT * FROM products WHERE price BETWEEN @min_price AND @max_price ORDER BY price ASC;
 END;
+GO
 
 -- End of script
-
-
-
-
-
-
-
-
